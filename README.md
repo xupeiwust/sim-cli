@@ -74,6 +74,10 @@ For the full driver protocol, server endpoints, and execution pipeline see [CLAU
 
 > **Names at a glance:** repo `svd-ai-lab/sim-cli` · PyPI distribution `sim-cli-core` · console command `sim` · import `import sim`. Yes, three different strings — the repo name predates the PyPI publish; the rest follow Python packaging convention.
 
+Prereq: [`uv`](https://docs.astral.sh/uv/) — install with `curl -LsSf https://astral.sh/uv/install.sh | sh` (macOS / Linux) or `irm https://astral.sh/uv/install.ps1 | iex` (Windows PowerShell).
+
+**macOS / Linux:**
+
 ```bash
 # 1. On the host that has the solver installed, install sim core only
 #    — no driver choice yet:
@@ -102,6 +106,34 @@ sim --host <server-ip> screenshot -o shot.png
 sim --host <server-ip> disconnect
 ```
 
+**Windows (PowerShell):**
+
+```powershell
+# 1. On the host that has the solver installed, install sim core only
+#    — no driver choice yet:
+uv pip install sim-cli-core
+
+# 2. Install the plugin for the solver you actually want (browse the
+#    index with `sim plugin list`):
+sim plugin install <solver>     # e.g. ltspice, coolprop, pybamm
+
+# 3. Tell sim to look at this machine and pick the right SDK profile:
+sim check <solver>
+
+# 4. Bootstrap that profile env (or pass --auto-install to step 5):
+sim env install <profile>
+
+# 5. Start the server (only needed for remote / cross-machine workflows):
+sim serve --host 0.0.0.0          # FastAPI on :7600
+
+# 6. From the agent / your laptop / anywhere on the network:
+sim --host <server-ip> connect --solver <solver> --mode solver --ui-mode gui
+sim --host <server-ip> inspect session.versions   # ← always do this first
+sim --host <server-ip> exec "<solver-specific snippet>"
+sim --host <server-ip> screenshot -o shot.png
+sim --host <server-ip> disconnect
+```
+
 That's the full loop: **detect → bootstrap → launch → drive → observe → tear down** — with the engineer optionally watching the solver GUI in real time.
 
 > **Why the bootstrap step?** Each `(solver, SDK, driver, skill)` combo is
@@ -111,6 +143,38 @@ That's the full loop: **detect → bootstrap → launch → drive → observe �
 > you can keep multiple versions on one machine without dependency
 > conflicts. The contract is in
 > [`docs/architecture/version-compat.md`](docs/architecture/version-compat.md).
+
+---
+
+## 📦 Curated plugins
+
+Curated plugin wheels are published to a public CDN at:
+
+```
+https://cdn.svdailab.com/manifest.json
+```
+
+Manifest schema:
+
+```json
+{
+  "updated": "<ISO date>",
+  "plugins": {
+    "<name>": {
+      "version": "<X.Y.Z>",
+      "wheel": "https://cdn.svdailab.com/wheels/<file>.whl"
+    }
+  }
+}
+```
+
+Fetch the manifest with any HTTP client, pick the wheel you want, then:
+
+```bash
+sim plugin install <wheel-url>
+```
+
+The manifest is anonymous-GET (no auth required) and updated whenever a new wheel ships.
 
 ---
 
