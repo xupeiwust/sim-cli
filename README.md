@@ -175,7 +175,7 @@ To install a wheel directly without going through the resolver, hand `sim plugin
 
 ## 🧪 Solver registry
 
-`sim-cli` core is **fully solver-agnostic** — it ships with **zero built-in drivers**. Every solver, including OpenFOAM, is reached through a **plugin package** registered via the `sim.drivers` entry-point group. Adding a new backend is a ~200-LOC `DriverProtocol` implementation in its own `sim-plugin-<name>` repo.
+`sim-cli` core is **fully solver-agnostic** — it ships with **zero built-in drivers**. Every solver is reached through a **plugin package** registered via the `sim.drivers` entry-point group. Adding a new backend is a ~200-LOC `DriverProtocol` implementation in its own `sim-plugin-<name>` repo.
 
 `sim` is most useful for **GUI-heavy solvers** — COMSOL, ANSYS Mechanical, ANSYS Fluent, MATLAB Simulink, Abaqus, Flotherm — where every agent iteration would otherwise mean clicking through dialog boxes.
 
